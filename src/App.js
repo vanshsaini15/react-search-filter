@@ -50,7 +50,7 @@ function DataList() {
     if (runningTimeout) clearTimeout(runningTimeout);
     runningTimeout = setTimeout(() => {
       setSearchName(value);
-    }, 1000);
+    }, 600);
   };
 
   useEffect(() => {
