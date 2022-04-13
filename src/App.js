@@ -1,4 +1,30 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useReducer } from "react";
+
+
+
+// const initialState ={
+//   userList: [],
+//   searchName: "",
+//   searchUsername: "",
+//   searchEmail: "",
+//   searchPhone: "",
+//   inputValue: "",
+//   name: "",
+//   email: "",
+//   phone: "",
+//   username: ""
+// }
+
+// const reducerFunc = (state, action) =>{
+//   switch (action.type){
+//     case ("UpdateItem"):
+//       return {...state, item: action.payload}
+
+//     default:
+//       return{ ...state, ...action}
+//   }
+// }
+
 
 let runningTimeout;
 
@@ -9,6 +35,14 @@ function DataList() {
   const [searchEmail, setSearchEmail] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
   const [inputValue, setInputValue] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
+
+  // const [state, dispatch] = useReducer(reducerFunc, initialState)
+
 
   const fetchData = () => {
     fetch("https://jsonplaceholder.typicode.com/users")
@@ -56,6 +90,33 @@ function DataList() {
   useEffect(() => {
     console.log("api call");
   }, [searchName]);
+
+  function selectUser(id) {
+    let data = userList[id - 1];
+    setName(data.name);
+    setUsername(data.username);
+    setEmail(data.email);
+    setPhone(data.phone);
+    setUserId(data.id);
+  }
+
+  function updateUser() {
+    let newList = userList.map(data => {
+      if (data.id == userId) {
+        return {
+          ...data,
+          name: name,
+          email: email,
+          phone: phone,
+          username: username,
+        }
+      } else {
+        return data;
+      }
+
+    })
+    setUserList(newList)
+  }
 
   return (
     <div className="table">
@@ -108,15 +169,59 @@ function DataList() {
           {filteredData.map((user) => {
             return (
               <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.phone}</td>
+                <td onClick={() => selectUser(user.id)}>{user.name}</td>
+                <td onClick={() => selectUser(user.id)}>{user.username}</td>
+                <td onClick={() => selectUser(user.id)}>{user.email}</td>
+                <td onClick={() => selectUser(user.id)}>{user.phone}</td>
+                <td>
+
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      <div id="form">
+      {"Update User Data "} <br></br> <br></br>
+      {"Name: " }<input
+
+          type="text"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+        />{""}
+        <br />
+        <br />
+        {"Username: "}<input
+          type="text"
+          value={username}
+          onChange={(e) => {
+            setUsername(e.target.value);
+          }}
+        />{" "}
+        <br />
+        <br />
+        {"Email: "}<input
+          type="text"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+          }}
+        />{" "}
+        <br />
+        <br />
+        {"Phone: "}<input
+          type="text"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+          }}
+        />{" "}
+        <br />
+        <br />
+        <button onClick={updateUser}>Update User</button>
+      </div>
     </div>
   );
 }
