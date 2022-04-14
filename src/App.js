@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, useReducer } from "react";
 
-
-
 // const initialState ={
 //   userList: [],
 //   searchName: "",
@@ -25,7 +23,6 @@ import React, { useState, useEffect, useMemo, useReducer } from "react";
 //   }
 // }
 
-
 let runningTimeout;
 
 function DataList() {
@@ -43,6 +40,11 @@ function DataList() {
 
   // const [state, dispatch] = useReducer(reducerFunc, initialState)
 
+  // const handleEvent = (e) => {
+  //   const value = e.target.value
+  //   const id = e.target.id
+  //   dispatchEvent({[id]: value})
+  // }
 
   const fetchData = () => {
     fetch("https://jsonplaceholder.typicode.com/users")
@@ -101,7 +103,7 @@ function DataList() {
   }
 
   function updateUser() {
-    let newList = userList.map(data => {
+    let newList = userList.map((data) => {
       if (data.id == userId) {
         return {
           ...data,
@@ -109,13 +111,12 @@ function DataList() {
           email: email,
           phone: phone,
           username: username,
-        }
+        };
       } else {
         return data;
       }
-
-    })
-    setUserList(newList)
+    });
+    setUserList(newList);
   }
 
   return (
@@ -180,17 +181,19 @@ function DataList() {
       </table>
       <div id="form">
         {"Update User Data "} <br></br> <br></br>
-        {"Name: "}<input
-
+        {"Name: "}
+        <input
           type="text"
           value={name}
           onChange={(e) => {
             setName(e.target.value);
           }}
-        />{""}
+        />
+        {""}
         <br />
         <br />
-        {"Username: "}<input
+        {"Username: "}
+        <input
           type="text"
           value={username}
           onChange={(e) => {
@@ -199,7 +202,8 @@ function DataList() {
         />{" "}
         <br />
         <br />
-        {"Email: "}<input
+        {"Email: "}
+        <input
           type="text"
           value={email}
           onChange={(e) => {
@@ -208,7 +212,8 @@ function DataList() {
         />{" "}
         <br />
         <br />
-        {"Phone: "}<input
+        {"Phone: "}
+        <input
           type="text"
           value={phone}
           onChange={(e) => {
