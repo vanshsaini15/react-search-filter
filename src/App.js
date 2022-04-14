@@ -173,17 +173,14 @@ function DataList() {
                 <td onClick={() => selectUser(user.id)}>{user.username}</td>
                 <td onClick={() => selectUser(user.id)}>{user.email}</td>
                 <td onClick={() => selectUser(user.id)}>{user.phone}</td>
-                <td>
-
-                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
       <div id="form">
-      {"Update User Data "} <br></br> <br></br>
-      {"Name: " }<input
+        {"Update User Data "} <br></br> <br></br>
+        {"Name: "}<input
 
           type="text"
           value={name}
