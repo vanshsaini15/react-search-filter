@@ -6,10 +6,6 @@ const initialState = {
   searchEmail: "",
   searchPhone: "",
   inputValue: "",
-  // name: "",
-  // email: "",
-  // phone: "",
-  // username: ""
 };
 
 const reducerFunc = (state, action) => {
@@ -32,11 +28,6 @@ function DataList() {
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
-  // const [searchName, setSearchName] = useState("");
-  // const [searchUsername, setSearchUsername] = useState("");
-  // const [searchEmail, setSearchEmail] = useState("");
-  // const [searchPhone, setSearchPhone] = useState("");
-  // const [inputValue, setInputValue] = useState("");
 
   const [state, dispatch] = useReducer(reducerFunc, initialState);
 
