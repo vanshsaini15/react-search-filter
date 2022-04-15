@@ -15,7 +15,7 @@
 
 #styling td, #styling th {
   border: 1px solid rgb(225, 225, 225);
-  padding: 10px;
+  padding: 10px
 }
 
 #styling tr:nth-child(even){background-color: #ffffff;}
