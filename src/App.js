@@ -6,6 +6,10 @@ const initialState = {
   searchEmail: "",
   searchPhone: "",
   inputValue: "",
+  // name: "",
+  // email: "",
+  // phone: "",
+  // username: ""
 };
 
 const reducerFunc = (state, action) => {
@@ -28,6 +32,12 @@ function DataList() {
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
+  const [addUserData, setAddUserData] = useState();
+  // const [searchName, setSearchName] = useState("");
+  // const [searchUsername, setSearchUsername] = useState("");
+  // const [searchEmail, setSearchEmail] = useState("");
+  // const [searchPhone, setSearchPhone] = useState("");
+  // const [inputValue, setInputValue] = useState("");
 
   const [state, dispatch] = useReducer(reducerFunc, initialState);
 
@@ -121,6 +131,32 @@ function DataList() {
     setUserList(newList);
   }
 
+  const handleAddUser = (event) => {
+    event.preventDefault();
+
+    const fieldName = event.target.getAttribute("name");
+    const fieldValue = event.target.value;
+
+    const newUserData = { ...addUserData };
+    newUserData[fieldName] = fieldValue;
+
+    setAddUserData(newUserData);
+  };
+
+  const handleAddFormSubmit = (event) => {
+    event.preventDefault();
+
+    const newUser = {
+      name: addUserData.name,
+      username: addUserData.username,
+      phone: addUserData.phone,
+      email: addUserData.email,
+    };
+
+    const newUsers = [...userList, newUser];
+    setUserList(newUsers);
+  };
+
   return (
     <div className="table">
       <table id="styling">
@@ -184,6 +220,46 @@ function DataList() {
           })}
         </tbody>
       </table>
+      <br></br>
+      <div id="form2">
+        {"Add User Data"}
+        <br></br>
+
+        <form onSubmit={handleAddFormSubmit}>
+          <br></br>
+          <input
+            type="text"
+            name="name"
+            required="required"
+            placeholder="Enter name"
+            onChange={handleAddUser}
+          />
+          <input
+            type="text"
+            name="username"
+            required="required"
+            placeholder="Enter username"
+            onChange={handleAddUser}
+          />
+          <input
+            type="text"
+            name="phone"
+            required="required"
+            placeholder="Enter phone"
+            onChange={handleAddUser}
+          />
+          <input
+            type="email"
+            name="email"
+            required="required"
+            placeholder="Enter email"
+            onChange={handleAddUser}
+          />
+          <button type="submit">Add</button>
+        </form>
+        <br></br>
+      </div>
+      <br></br>
       <div id="form">
         {"Update User Data "} <br></br> <br></br>
         {"Name: "}
