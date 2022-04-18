@@ -33,6 +33,8 @@ function DataList() {
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
   const [addUserData, setAddUserData] = useState();
+
+  const [show, setShow] = useState(false);
   // const [searchName, setSearchName] = useState("");
   // const [searchUsername, setSearchUsername] = useState("");
   // const [searchEmail, setSearchEmail] = useState("");
@@ -112,6 +114,8 @@ function DataList() {
     setEmail(data.email);
     setPhone(data.phone);
     setUserId(data.id);
+
+    setShow(!show);
   }
 
   function updateUser() {
@@ -221,90 +225,96 @@ function DataList() {
         </tbody>
       </table>
       <br></br>
-      <div id="form2">
-        {"Add User Data"}
-        <br></br>
-
-        <form onSubmit={handleAddFormSubmit}>
-          <br></br>
+      {show && (
+        <div id="form">
+          {"Update User Data "} <br></br> <br></br>
+          {"Name: "}
           <input
             type="text"
-            name="name"
-            required="required"
-            placeholder="Enter name"
-            onChange={handleAddUser}
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
           />
+          {""}
+          <br />
+          <br />
+          {"Username: "}
           <input
             type="text"
-            name="username"
-            required="required"
-            placeholder="Enter username"
-            onChange={handleAddUser}
-          />
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+            }}
+          />{" "}
+          <br />
+          <br />
+          {"Email: "}
           <input
             type="text"
-            name="phone"
-            required="required"
-            placeholder="Enter phone"
-            onChange={handleAddUser}
-          />
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+          />{" "}
+          <br />
+          <br />
+          {"Phone: "}
           <input
-            type="email"
-            name="email"
-            required="required"
-            placeholder="Enter email"
-            onChange={handleAddUser}
-          />
-          <button type="submit">Add</button>
-        </form>
-        <br></br>
-      </div>
+            type="text"
+            value={phone}
+            onChange={(e) => {
+              setPhone(e.target.value);
+            }}
+          />{" "}
+          <br />
+          <br />
+          <button onClick={updateUser}>Update User</button>
+        </div>
+      )}
       <br></br>
-      <div id="form">
-        {"Update User Data "} <br></br> <br></br>
-        {"Name: "}
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-        />
-        {""}
-        <br />
-        <br />
-        {"Username: "}
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => {
-            setUsername(e.target.value);
-          }}
-        />{" "}
-        <br />
-        <br />
-        {"Email: "}
-        <input
-          type="text"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
-        />{" "}
-        <br />
-        <br />
-        {"Phone: "}
-        <input
-          type="text"
-          value={phone}
-          onChange={(e) => {
-            setPhone(e.target.value);
-          }}
-        />{" "}
-        <br />
-        <br />
-        <button onClick={updateUser}>Update User</button>
-      </div>
+
+      {show && (
+        <div id="form2">
+          {"Add User Data"}
+          <br></br>
+
+          <form onSubmit={handleAddFormSubmit}>
+            <br></br>
+            <input
+              type="text"
+              name="name"
+              required="required"
+              placeholder="Enter name"
+              onChange={handleAddUser}
+            />
+            <input
+              type="text"
+              name="username"
+              required="required"
+              placeholder="Enter username"
+              onChange={handleAddUser}
+            />
+            <input
+              type="text"
+              name="phone"
+              required="required"
+              placeholder="Enter phone"
+              onChange={handleAddUser}
+            />
+            <input
+              type="email"
+              name="email"
+              required="required"
+              placeholder="Enter email"
+              onChange={handleAddUser}
+            />
+            <button type="submit">Add</button>
+          </form>
+          <br></br>
+        </div>
+      )}
+      <br></br>
     </div>
   );
 }
