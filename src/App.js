@@ -1,322 +1,470 @@
-import React, { useState, useEffect, useMemo, useReducer } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { CompactPicker } from "react-color";
 
-const initialState = {
-  searchName: "",
-  searchUsername: "",
-  searchEmail: "",
-  searchPhone: "",
-  inputValue: "",
-  // name: "",
-  // email: "",
-  // phone: "",
-  // username: ""
-};
+import * as am5 from "@amcharts/amcharts5";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
-const reducerFunc = (state, action) => {
-  console.log(action);
-  switch (action.type) {
-    // case ("UpdateItem"):
-    //   return {...state, item: action.payload}
+//chart type
+import * as am5percent from "@amcharts/amcharts5/percent";
+import "./index.css";
+import data from "./data";
 
-    default:
-      return { ...state, ...action };
-  }
-};
+const radArr = [25, 50, 75, 90, 100];
+const innerRadArr = [0, 25, 50, 75, 100];
+const textTypeArr = ["circular","radial"]
 
-let runningTimeout;
+const Chart = () => {
+  let rootChart = useRef();
+  let firstRender = useRef(true);
 
-function DataList() {
-  const [userList, setUserList] = useState([]);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [username, setUsername] = useState("");
-  const [userId, setUserId] = useState("");
-  const [addUserData, setAddUserData] = useState();
+  const [value, setValue] = useState("set1");
 
-  const [show, setShow] = useState(false);
-  // const [searchName, setSearchName] = useState("");
-  // const [searchUsername, setSearchUsername] = useState("");
-  // const [searchEmail, setSearchEmail] = useState("");
-  // const [searchPhone, setSearchPhone] = useState("");
-  // const [inputValue, setInputValue] = useState("");
+  const [config, setConfig] = useState({
+    radius: 90,
+    innerRadius: "0",
+    fillOpacity: 1,
+    strokeColor: "#000000",
+    strokeWidth: 0.2,
+    legend: true,
+    tooltip: true,
+    fontSize: 18,
+    fontColor: "#000000",
+    alignLabels: false,
+    textType: 'circular',
+    hideLabels: false
+  });
 
-  const [state, dispatch] = useReducer(reducerFunc, initialState);
+  useEffect(() => {
+    if (firstRender.current) {
+      let root = am5.Root.new("chartID");
+      rootChart.current = root;
+      firstRender.current = false;
+      let pieChart = createPieChart(config);
+      return () => {
+        pieChart.dispose();
+      };
+    } else {
+      let pieChart = createPieChart(config);
+      return () => {
+        pieChart.dispose();
+      };
+    }
+  }, [config, value]);
 
-  const handleEvent = (e) => {
-    const value = e.target.value;
-    const id = e.target.id;
-    dispatch({ [id]: value });
+  function createPieChart(config) {
+    rootChart.current.setThemes([am5themes_Animated.new(rootChart.current)]);
 
-    console.log("working");
-  };
-
-  const fetchData = () => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => {
-        return response.json();
+    let chart = rootChart.current.container.children.push(
+      am5percent.PieChart.new(rootChart.current, {
+        endAngle: 270,
+        centerY: am5.percent(0),
+        centerX: am5.percent(0),
+        y: am5.percent(0),
+        x: am5.percent(0),
       })
-      .then((data) => {
-        setUserList(data);
-      });
-  };
+    );
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+    let series = chart.series.push(
+      am5percent.PieSeries.new(rootChart.current, {
+        valueField: "value",
+        categoryField: "category",
+        colorField: "color",
+        endAngle: 270,
+       
+        
+      })
+    );
 
-  let filteredData = useMemo(() => {
-    return userList.filter((data) => {
-      if (
-        state.searchName === "" &&
-        state.searchEmail === "" &&
-        state.searchUsername === "" &&
-        state.searchPhone === ""
-      ) {
-        return data;
-      } else if (
-        data.name.toLowerCase().includes(state.searchName.toLowerCase()) &&
-        data.email.toLowerCase().includes(state.searchEmail.toLowerCase()) &&
-        data.username
-          .toLowerCase()
-          .includes(state.searchUsername.toLowerCase()) &&
-        data.phone.toLowerCase().includes(state.searchPhone.toLowerCase())
-      ) {
-        return data;
-      }
+    series.states.create("hidden", {
+      endAngle: -90,
     });
-  }, [
-    state.searchName,
-    state.searchUsername,
-    state.searchEmail,
-    state.searchPhone,
-    userList,
-  ]);
 
-  const debouncedOnChange = (e) => {
-    const value = e.target.value;
-    const id = e.target.id;
+    series.data.setAll(data[value]);
 
-    if (runningTimeout) clearTimeout(runningTimeout);
-    runningTimeout = setTimeout(() => {
-      dispatch({ [id]: value });
-    }, 600);
-  };
+    series.setAll({
+      radius: am5.percent(config.radius),
+      innerRadius: am5.percent(config.innerRadius),
+      alignLabels: config.alignLabels,
+      
+    });
 
-  useEffect(() => {
-    console.log("api call");
-  }, [state.searchName]);
+    series.slices.template.setAll({
+      fillOpacity: config.fillOpacity,
+      stroke: config.strokeColor,
+      strokeWidth: config.strokeWidth,
+      
+     
+    });
 
-  function selectUser(id) {
-    let data = userList[id - 1];
-    setName(data.name);
-    setUsername(data.username);
-    setEmail(data.email);
-    setPhone(data.phone);
-    setUserId(data.id);
+   
+    series.labels.template.setAll({
+      fontSize: config.fontSize,
+      fill: config.fontColor,
+      text: "{category}",
+      textType: config.textType,
+      forceHidden: config.hideLabels,
+    });
 
-    setShow(!show);
+
+    series.get("colors").set("colors", {});
+
+    if (config.legend) {
+      var legend = chart.children.push(
+        am5.Legend.new(rootChart.current, {
+          centerY: am5.percent(0),
+          centerX: am5.percent(0),
+          y: am5.percent(96),
+          x: am5.percent(10),
+          layout: rootChart.current.horizontalLayout,
+        })
+      );
+
+      legend.data.setAll(series.dataItems);
+    }
+
+    if (config.tooltip) {
+      series.slices.template.set(
+        "tooltipText",
+        "{category}: [bold]{valuePercentTotal.formatNumber('0.00')}%[/] ({value})"
+      );
+    } else {
+      series.slices.template.set("tooltipText", "");
+    }
+    
+    // series.appear(1000, 100);
+
+    return chart;
   }
 
-  function updateUser() {
-    let newList = userList.map((data) => {
-      if (data.id == userId) {
-        return {
-          ...data,
-          name: name,
-          email: email,
-          phone: phone,
-          username: username,
-        };
-      } else {
-        return data;
-      }
-    });
-    setUserList(newList);
+  function selectDataset(e) {
+    setValue(e.target.value);
   }
 
-  const handleAddUser = (event) => {
-    event.preventDefault();
-
-    const fieldName = event.target.getAttribute("name");
-    const fieldValue = event.target.value;
-
-    const newUserData = { ...addUserData };
-    newUserData[fieldName] = fieldValue;
-
-    setAddUserData(newUserData);
+  const handleStrokeColor = (color) => {
+    setConfig((prevState) => ({ ...prevState, strokeColor: color.hex }));
   };
 
-  const handleAddFormSubmit = (event) => {
-    event.preventDefault();
+  const handleFontColor = (color) => {
+    setConfig((prevState) => ({ ...prevState, fontColor: color.hex }));
+  };
 
-    const newUser = {
-      name: addUserData.name,
-      username: addUserData.username,
-      phone: addUserData.phone,
-      email: addUserData.email,
-    };
+  const handleHideLegend = (e) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      setConfig((prevState) => ({ ...prevState, legend: false }));
+    } else {
+      setConfig((prevState) => ({ ...prevState, legend: true }));
+    }
+  };
 
-    const newUsers = [...userList, newUser];
-    setUserList(newUsers);
+  const handleHideTooltip = (e) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      setConfig((prevState) => ({ ...prevState, tooltip: false }));
+    } else {
+      setConfig((prevState) => ({ ...prevState, tooltip: true }));
+    }
+  };
+
+  const handleAlignLabels = (e) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      setConfig((prevState) => ({ ...prevState, alignLabels: true }));
+    } else {
+      setConfig((prevState) => ({ ...prevState, alignLabels: false }));
+    }
+  };
+
+  const handleHideLabels = (e) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      setConfig((prevState) => ({ ...prevState, hideLabels: true }));
+    } else {
+      setConfig((prevState) => ({ ...prevState, hideLabels: false }));
+    }
   };
 
   return (
-    <div className="table">
-      <table id="styling">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Phone</th>
-          </tr>
+    <>
+      <hr></hr>
 
-          <tr>
-            <td>
-              <input
-                id="searchName"
-                type="text"
-                onChange={debouncedOnChange}
-                placeholder="Search"
-              />
-            </td>
-            <td>
-              <input
-                id="searchUsername"
-                type="text"
-                value={state.searchUsername}
-                onChange={handleEvent}
-                placeholder="Search"
-              />
-            </td>
-            <td>
-              <input
-                id="searchEmail"
-                type="text"
-                value={state.searchEmail}
-                onChange={handleEvent}
-                placeholder="Search"
-              />
-            </td>
-            <td>
-              <input
-                id="searchPhone"
-                type="text"
-                value={state.searchPhone}
-                onChange={handleEvent}
-                placeholder="Search"
-              />
-            </td>
-          </tr>
-        </thead>
+      <div className="config-box">
+        <div className="dropdown d-flex flex-column align-items-center float-start">
+          Select Data Set{" "}
+          <select
+            onChange={selectDataset}
+            className="btn btn-secondary dropdown-toggle mt-2"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <option value="set1">Data Set 1</option>
+            <option value="set2">Data Set 2</option>
+            <option value="set3">Data Set 3</option>
+          </select>
+        </div>
 
-        <tbody id="body">
-          {filteredData.map((user) => {
-            return (
-              <tr key={user.id}>
-                <td onClick={() => selectUser(user.id)}>{user.name}</td>
-                <td onClick={() => selectUser(user.id)}>{user.username}</td>
-                <td onClick={() => selectUser(user.id)}>{user.email}</td>
-                <td onClick={() => selectUser(user.id)}>{user.phone}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <br></br>
-      {show && (
-        <div id="form">
-          {"Update User Data "} <br></br> <br></br>
-          {"Name: "}
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
+        <div className="dropdown d-flex flex-column align-items-center float-end ">
+          Select Radius{" "}
+          <button
+            className="btn btn-secondary dropdown-toggle mt-2"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Outer Radius: {config.radius ? config.radius : ""}%
+          </button>
+          <ul
+            className="dropdown-menu overflow-auto"
+            aria-labelledby="dropdownMenuButton1"
+            style={{ height: "auto" }}
+          >
+            {radArr.map((rad, idx) => (
+              <li key={idx}>
+                <button
+                  className="dropdown-item"
+                  onClick={() =>
+                    setConfig((prevState) => ({ ...prevState, radius: rad }))
+                  }
+                >
+                  {rad}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            className="btn btn-secondary dropdown-toggle mt-2"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Inner Radius: {config.innerRadius ? config.innerRadius : ""}%
+          </button>
+          <ul
+            className="dropdown-menu overflow-auto"
+            aria-labelledby="dropdownMenuButton1"
+            style={{ height: "auto" }}
+          >
+            {innerRadArr.map((rad, idx) => (
+              <li key={idx}>
+                <button
+                  className="dropdown-item"
+                  onClick={() =>
+                    setConfig((prevState) => ({
+                      ...prevState,
+                      innerRadius: rad,
+                    }))
+                  }
+                >
+                  {rad}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <br></br>
+
+          Select Text Type{" "}
+          <button
+            className="btn btn-secondary dropdown-toggle mt-2"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            {config.textType ? config.textType : ""}
+          </button>
+          <ul
+            className="dropdown-menu overflow-auto"
+            aria-labelledby="dropdownMenuButton1"
+            style={{ height: "auto" }}
+          >
+            {textTypeArr.map((txt, idx) => (
+              <li key={idx}>
+                <button
+                  className="dropdown-item"
+                  onClick={() =>
+                    setConfig((prevState) => ({
+                      ...prevState,
+                      textType: txt,
+                    }))
+                  }
+                >
+                  {txt}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="dropdown d-flex flex-column align-items-center">
+          <p className="text-style">Fill Opacity</p>
+
+          <span>
+            <button
+              disabled={config.fillOpacity == 0}
+              onClick={() =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  fillOpacity: Number(config.fillOpacity - 0.1).toFixed(1),
+                }))
+              }
+            >
+              -
+            </button>
+
+            <input
+              value={config.fillOpacity}
+              onChange={(e) =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  fillOpacity: e.target.value,
+                }))
+              }
+              style={{ width: "128px", textAlign: "center" }}
+            />
+            <button
+              disabled={config.fillOpacity == 1}
+              onClick={() =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  fillOpacity: Number(config.fillOpacity) + 0.1,
+                }))
+              }
+            >
+              +
+            </button>
+          </span>
+        </div>
+
+        <div className="dropdown d-flex flex-column align-items-center">
+          <br></br>
+          <p className="text-style">Stroke Width</p>
+
+          <span>
+            <button
+              disabled={config.strokeWidth == 0.1}
+              onClick={() =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  strokeWidth: Number(config.strokeWidth - 0.1).toFixed(1),
+                }))
+              }
+            >
+              -
+            </button>
+
+            <input
+              value={config.strokeWidth}
+              onChange={(e) =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  strokeWidth: e.target.value,
+                }))
+              }
+              style={{ width: "128px", textAlign: "center" }}
+            />
+            <button
+              onClick={() =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  strokeWidth: Number(config.strokeWidth) + 0.1,
+                }))
+              }
+            >
+              +
+            </button>
+          </span>
+
+          <br></br>
+          <p className="text-style">Font Size</p>
+          <span>
+            <button
+              disabled={config.fontSize == 0.1}
+              onClick={() =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  fontSize: Number(config.fontSize - 1),
+                }))
+              }
+            >
+              -
+            </button>
+
+            <input
+              value={config.fontSize}
+              onChange={(e) =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  fontSize: e.target.value,
+                }))
+              }
+              style={{ width: "128px", textAlign: "center" }}
+            />
+            <button
+              onClick={() =>
+                setConfig((prevState) => ({
+                  ...prevState,
+                  fontSize: Number(config.fontSize) + 1,
+                }))
+              }
+            >
+              +
+            </button>
+          </span>
+        </div>
+
+        <div className="dropdown d-flex flex-column align-items-center">
+          <br></br>
+          <p className="text-style2">Stroke Color</p>
+          <CompactPicker
+            color={config.strokeColor}
+            onChange={handleStrokeColor}
           />
-          {""}
-          <br />
-          <br />
-          {"Username: "}
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
-          />{" "}
-          <br />
-          <br />
-          {"Email: "}
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-          />{" "}
-          <br />
-          <br />
-          {"Phone: "}
-          <input
-            type="text"
-            value={phone}
-            onChange={(e) => {
-              setPhone(e.target.value);
-            }}
-          />{" "}
-          <br />
-          <br />
-          <button onClick={updateUser}>Update User</button>
-        </div>
-      )}
-      <br></br>
-
-      {show && (
-        <div id="form2">
-          {"Add User Data"}
           <br></br>
-
-          <form onSubmit={handleAddFormSubmit}>
-            <br></br>
-            <input
-              type="text"
-              name="name"
-              required="required"
-              placeholder="Enter name"
-              onChange={handleAddUser}
-            />
-            <input
-              type="text"
-              name="username"
-              required="required"
-              placeholder="Enter username"
-              onChange={handleAddUser}
-            />
-            <input
-              type="text"
-              name="phone"
-              required="required"
-              placeholder="Enter phone"
-              onChange={handleAddUser}
-            />
-            <input
-              type="email"
-              name="email"
-              required="required"
-              placeholder="Enter email"
-              onChange={handleAddUser}
-            />
-            <button type="submit">Add</button>
-          </form>
-          <br></br>
+          <p className="text-style2">Font Color</p>
+          <CompactPicker color={config.fontColor} onChange={handleFontColor} />
         </div>
-      )}
-      <br></br>
-    </div>
+
+        <hr></hr>
+        <div className="chart" id="chartID" style={{ height: "650px" }}></div>
+        <div
+          className="d-flex flex-row align-items-center justify-content-center"
+          style={{ height: "100px" }}
+        >
+          <input
+            type="checkbox"
+            className="legend"
+            onClick={handleHideLegend}
+          />
+          <p className="">Hide legend</p>
+
+          <input
+            type="checkbox"
+            className="legend"
+            onClick={handleHideTooltip}
+          />
+          <p className="">Hide tooltip</p>
+
+          <input
+            type="checkbox"
+            className="legend"
+            onClick={handleAlignLabels}
+          />
+          <p className="">Align labels</p>
+
+          <input
+            type="checkbox"
+            className="legend"
+            onClick={handleHideLabels}
+          />
+          <p className="">Hide labels</p>
+        </div>
+        <hr></hr>
+      </div>
+    </>
   );
-}
-
-export default DataList;
+};
+export default Chart;
